@@ -1,5 +1,5 @@
 resource "aws_db_subnet_group" "solidarytech_db_subnet_group" {
-  name       = "solidarytech-db-subnet-group-${var.environment}"
+  name       = lower("solidarytech-db-subnet-group-${var.environment}")
   subnet_ids = module.vpc.private_subnets
 
   tags = {
@@ -8,7 +8,7 @@ resource "aws_db_subnet_group" "solidarytech_db_subnet_group" {
 }
 
 resource "aws_security_group" "rds_sg" {
-  name        = "solidarytech-rds-sg-${var.environment}"
+  name        = lower("solidarytech-rds-sg-${var.environment}")
   description = "Allow inbound traffic from EKS"
   vpc_id      = module.vpc.vpc_id
 
