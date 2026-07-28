@@ -21,3 +21,19 @@ variable "vpc_cidr" {
   type        = string
   default     = "10.0.0.0/16"
 }
+
+variable "is_dr" {
+  description = "Define if this is the DR region"
+  type        = bool
+  default     = false
+}
+
+variable "primary_ngo_db_arn" {
+  type    = string
+  default = null
+}
+
+variable "primary_donation_db_arn" {
+  type    = string
+  default = null
+}

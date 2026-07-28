@@ -5,11 +5,44 @@ on:
     branches:
       - main
   pull_request:
+  workflow_dispatch:
+    inputs:
+      region_role:
+        description: 'Role da Região no DR (active ou passive)'
+        required: true
+        default: 'active'
+        type: choice
+        options:
+          - active
+          - passive
+      aws_region:
+        description: 'Região da AWS (Primária ou DR)'
+        required: true
+        default: 'us-east-1'
+        type: choice
+        options:
+          - us-east-1
+          - us-west-2
+      primary_ngo_db_arn:
+        description: 'ARN do RDS Primário NGO (Obrigatório se passive)'
+        required: false
+        type: string
+      primary_donation_db_arn:
+        description: 'ARN do RDS Primário Donation (Obrigatório se passive)'
+        required: false
+        type: string
 
 jobs:
   terraform-plan:
     name: 'Terraform Plan'
     runs-on: ubuntu-latest
+    env:
+      TF_VAR_aws_region: ${{ github.event.inputs.aws_region || 'us-east-1' }}
+      TF_VAR_region_role: ${{ github.event.inputs.region_role || 'active' }}
+      TF_VAR_primary_ngo_db_arn: ${{ github.event.inputs.primary_ngo_db_arn || '' }}
+      TF_VAR_primary_donation_db_arn: ${{ github.event.inputs.primary_donation_db_arn || '' }}
+      AWS_REGION: ${{ github.event.inputs.aws_region || 'us-east-1' }}
+
     defaults:
       run:
         working-directory: ./
@@ -23,7 +56,7 @@ jobs:
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-east-1
+        aws-region: ${{ env.AWS_REGION }}
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v2
@@ -51,12 +84,19 @@ jobs:
     name: 'Terraform Apply'
     needs: terraform-plan
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     
     # Adicionamos um ambiente (opcional). No GitHub você pode configurar regras de proteção (Require approval)
     # para este environment "production" para que o apply não rode sem intervenção humana, mesmo no main.
     environment: production
     
+    env:
+      TF_VAR_aws_region: ${{ github.event.inputs.aws_region || 'us-east-1' }}
+      TF_VAR_region_role: ${{ github.event.inputs.region_role || 'active' }}
+      TF_VAR_primary_ngo_db_arn: ${{ github.event.inputs.primary_ngo_db_arn || '' }}
+      TF_VAR_primary_donation_db_arn: ${{ github.event.inputs.primary_donation_db_arn || '' }}
+      AWS_REGION: ${{ github.event.inputs.aws_region || 'us-east-1' }}
+
     defaults:
       run:
         working-directory: ./
@@ -70,7 +110,7 @@ jobs:
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-east-1
+        aws-region: ${{ env.AWS_REGION }}
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v2

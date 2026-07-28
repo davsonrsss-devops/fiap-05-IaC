@@ -21,3 +21,19 @@ variable "vpc_cidr" {
   type        = string
   default     = "10.0.0.0/16"
 }
+
+variable "region_role" {
+  description = "Papel desta região no DR (active ou passive)"
+  type        = string
+  default     = "active"
+}
+
+variable "primary_ngo_db_arn" {
+  type    = string
+  default = null
+}
+
+variable "primary_donation_db_arn" {
+  type    = string
+  default = null
+}
