@@ -1,5 +1,5 @@
 resource "aws_db_subnet_group" "solidarytech_db_subnet_group" {
-  name       = lower("solidarytech-db-subnet-group-${var.environment}")
+  name       = lower("solidarytech-db-subnet-group-v2-${var.environment}")
   subnet_ids = module.vpc.private_subnets
 
   tags = {

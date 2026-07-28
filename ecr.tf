@@ -62,3 +62,8 @@ resource "aws_ecr_replication_configuration" "main" {
 }
 
 data "aws_caller_identity" "current" {}
+
+import {
+  to = aws_ecr_repository.frontend_service
+  id = "solidarytech/frontend"
+}
